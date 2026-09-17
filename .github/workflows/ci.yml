@@ -9,8 +9,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
@@ -22,8 +22,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: godot-gdunit-labs/gdUnit4-action@v1
+      - uses: actions/checkout@v5
+      - uses: godot-gdunit-labs/gdUnit4-action@v1.3.2
         with:
           godot-version: "4.7.2"
           paths: "res://tests"
+          # No test suites exist yet (Phase 0 scaffold only), so there's no report to
+          # publish/upload - re-enable both once Phase 1 adds real GdUnit4 tests.
+          publish-report: false
+          upload-report: false
