@@ -22,35 +22,43 @@ built" — this is that build.
 | `coverage-overall` / `coverage-changed-lines` | GdUnit4 built-in coverage report | `scripts/run_tests.ps1` (`-c` coverage flag), threshold checked against `config/thresholds.yaml` |
 | `srp-size` | `scripts/check_size_budgets.py` | run via `pre-commit` and CI |
 | `naming-grep-discoverable` | `scripts/check_naming.py` | run via `pre-commit` and CI |
-| `no-cross-cutting-helper-violation` | manual review for now | see "Not yet automated" below |
+| `no-cross-cutting-helper-violation` | `scripts/check_helper_promotion.py` | run via `pre-commit` and CI |
 | `commit-message-conforms` | `pre-commit` hook (Conventional Commits regex) | `.pre-commit-config.yaml` |
-| `branch-name-conforms` | procedural, via `.claude/skills/run-phase/SKILL.md` | see "Not yet automated" below |
-| `ocp-shotgun-surgery` | manual review for now | see "Not yet automated" below |
-| `isp-method-count` / `isp-stub-detection` | manual review for now | see "Not yet automated" below |
-| `dip-direction` | manual review for now | see "Not yet automated" below |
+| `branch-name-conforms` | procedural, via `.claude/skills/run-phase/SKILL.md` | see "Procedural, not scripted" below |
+| `ocp-shotgun-surgery` | `scripts/check_ocp_shotgun_surgery.py` | CI only (needs a diff vs. the PR base ref — see below) |
+| `isp-method-count` / `isp-stub-detection` | `scripts/check_isp.py` | run via `pre-commit` and CI |
+| `dip-direction` | `scripts/check_dip_direction.py` | run via `pre-commit` and CI |
 | `progress-trend` | `scripts/run_tests.ps1` output diffed against the prior progress-log entry by hand | see `principles/progress-tracking.md` |
 
-## Not yet automated (stated plainly, not faked)
+## Heuristic limits (stated plainly, not hidden)
 
-Per `principles/solid-mechanical.md`'s own convention of honestly labeling unautomated
-checks rather than inventing a hollow tool for them, the following rubric rows have **no
-mechanical check yet** in this project and are reviewed manually at the end of each
-implementation pass, by reading the diff against the stated question:
+Per `principles/solid-mechanical.md`'s own convention of honestly labeling what a check
+does and doesn't prove, these four scripts are real mechanical checks but each is a
+heuristic, documented in its own docstring — read it before trusting a green run blindly:
 
-- `ocp-shotgun-surgery` — does this diff touch ≥3 pre-existing files to add one new
-  case/behaviour?
-- `isp-method-count` / `isp-stub-detection` — does any interface exceed 7 methods, or does
-  any implementer have a not-implemented/no-op stub body?
-- `dip-direction` — does any `src/**` domain file `preload`/`extends` a low-level/engine
-  concern it shouldn't (this project doesn't yet separate "domain" vs. "infrastructure"
-  directories formally, so this is judgement-only until that separation exists)?
-- `branch-name-conforms` — no mechanical linter yet; enforced procedurally instead via
+- `check_isp.py` — stub-detection flags *any* trivial function body, not only true
+  overrides of a base method with real behaviour (no inheritance graph is built). A
+  legitimate no-op virtual hook will false-positive.
+- `check_ocp_shotgun_surgery.py` — counts pre-existing `src/` files modified in this
+  diff; it cannot distinguish "one new case forced N files open" from any other reason N
+  files changed together (e.g. a deliberate, justified refactor). Only runs in CI, since
+  it needs a diff against the PR's base ref, not just the working tree.
+- `check_dip_direction.py` — enforces this project's own domain/infrastructure boundary
+  (`src/` = engine-agnostic, `scenes/` = Godot glue) via `extends` and
+  `preload`/`load` keyword scanning, not a full call-graph analysis.
+- `check_helper_promotion.py` — only catches the catch-all-filename shape of the
+  violation (`utils.gd`, `helpers.gd`, `common.gd`, `base.gd`, `manager.gd`); it can't
+  detect a helper duplicated past the promotion threshold without call-graph tooling.
+
+Automating past these heuristics (a real call-graph/AST tool for GDScript) is future work,
+not a gap papered over with a script that always passes.
+
+## Procedural, not scripted
+
+- `branch-name-conforms` — no mechanical linter; enforced procedurally instead via
   `.claude/skills/run-phase/SKILL.md`, which always branches with a purpose-driven
   Conventional Branch prefix (`feature/`, `fix/`, `hotfix/`, `release/`, `chore/`) before
   any implementation work starts.
-
-Automating these (a call-graph/AST tool for GDScript) is real future work, not a gap to
-paper over with a script that always passes.
 
 ## Running the checks locally
 
@@ -59,9 +67,15 @@ paper over with a script that always passes.
 gdlint src tests
 gdformat --check src tests
 
-# Size-budget and naming checks
+# Size-budget, naming, ISP, DIP, and helper-promotion checks
 python dev_kit/ci/godot/scripts/check_size_budgets.py
 python dev_kit/ci/godot/scripts/check_naming.py
+python dev_kit/ci/godot/scripts/check_isp.py
+python dev_kit/ci/godot/scripts/check_dip_direction.py
+python dev_kit/ci/godot/scripts/check_helper_promotion.py
+
+# OCP shotgun-surgery (diff-scoped, defaults to comparing against origin/main)
+python dev_kit/ci/godot/scripts/check_ocp_shotgun_surgery.py [base-ref]
 
 # Full test suite + coverage (requires GODOT_BIN — see tools/local.env)
 pwsh dev_kit/ci/godot/scripts/run_tests.ps1

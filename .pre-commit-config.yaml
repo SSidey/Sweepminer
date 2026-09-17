@@ -23,6 +23,27 @@ repos:
         pass_filenames: false
         files: \.gd$
 
+      - id: isp-checks
+        name: isp-method-count / isp-stub-detection
+        entry: python dev_kit/ci/godot/scripts/check_isp.py
+        language: system
+        pass_filenames: false
+        files: \.gd$
+
+      - id: dip-direction
+        name: dip-direction
+        entry: python dev_kit/ci/godot/scripts/check_dip_direction.py
+        language: system
+        pass_filenames: false
+        files: \.gd$
+
+      - id: no-cross-cutting-helper-violation
+        name: no-cross-cutting-helper-violation
+        entry: python dev_kit/ci/godot/scripts/check_helper_promotion.py
+        language: system
+        pass_filenames: false
+        files: \.gd$
+
       - id: commit-message-conforms
         name: commit-message-conforms (Conventional Commits)
         entry: python dev_kit/ci/godot/scripts/check_commit_message.py
