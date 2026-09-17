@@ -87,15 +87,19 @@ This is `dev_kit/principles/progress-tracking.md` Gate 1 — mechanical, hard, a
 skippable:
 
 1. Run the full suite: `pwsh dev_kit/ci/godot/scripts/run_tests.ps1`.
-2. Run `python dev_kit/ci/godot/scripts/check_size_budgets.py` and
-   `python dev_kit/ci/godot/scripts/check_naming.py`.
+2. Run the static checks: `check_size_budgets.py`, `check_naming.py`, `check_isp.py`,
+   `check_dip_direction.py`, `check_helper_promotion.py`, and
+   `check_ocp_shotgun_surgery.py origin/main` (all under
+   `dev_kit/ci/godot/scripts/`) — these also run in `pre-commit`/CI, but run them
+   directly here to catch anything before pushing.
 3. Compare against the pre-phase baseline: rubric pass count, test count, coverage
    (overall and changed-lines, ≥90% per `dev_kit/config/thresholds.yaml`), lint warning
    count, size-budget violations. **Any regression blocks the phase from being done** —
    loop back into step 2 rather than opening a PR with a known regression.
-4. Manually walk the rubric rows this project hasn't automated yet
-   (`dev_kit/ci/godot/README.md`, "Not yet automated": OCP shotgun-surgery, ISP
-   method-count/stub-detection, DIP direction) and note the answer.
+4. Read each static check's heuristic-limit note in
+   `dev_kit/ci/godot/README.md` ("Heuristic limits") before trusting a green run
+   blindly — a pass means the specific heuristic found nothing, not that the underlying
+   SOLID property is proven.
 5. Update `README.md`'s **Status** and **Roadmap** sections to reflect the phase's actual
    completion state — this is a standing part of finishing a phase, not optional polish.
 
