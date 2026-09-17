@@ -24,7 +24,7 @@ built" — this is that build.
 | `naming-grep-discoverable` | `scripts/check_naming.py` | run via `pre-commit` and CI |
 | `no-cross-cutting-helper-violation` | manual review for now | see "Not yet automated" below |
 | `commit-message-conforms` | `pre-commit` hook (Conventional Commits regex) | `.pre-commit-config.yaml` |
-| `branch-name-conforms` | checked manually before push for now | see "Not yet automated" below |
+| `branch-name-conforms` | procedural, via `.claude/skills/run-phase/SKILL.md` | see "Not yet automated" below |
 | `ocp-shotgun-surgery` | manual review for now | see "Not yet automated" below |
 | `isp-method-count` / `isp-stub-detection` | manual review for now | see "Not yet automated" below |
 | `dip-direction` | manual review for now | see "Not yet automated" below |
@@ -44,7 +44,10 @@ implementation pass, by reading the diff against the stated question:
 - `dip-direction` — does any `src/**` domain file `preload`/`extends` a low-level/engine
   concern it shouldn't (this project doesn't yet separate "domain" vs. "infrastructure"
   directories formally, so this is judgement-only until that separation exists)?
-- `branch-name-conforms` — checked by eye against Conventional Branch naming before push.
+- `branch-name-conforms` — no mechanical linter yet; enforced procedurally instead via
+  `.claude/skills/run-phase/SKILL.md`, which always branches with a purpose-driven
+  Conventional Branch prefix (`feature/`, `fix/`, `hotfix/`, `release/`, `chore/`) before
+  any implementation work starts.
 
 Automating these (a call-graph/AST tool for GDScript) is real future work, not a gap to
 paper over with a script that always passes.
