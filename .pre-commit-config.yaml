@@ -1,0 +1,30 @@
+repos:
+  - repo: https://github.com/Scony/godot-gdscript-toolkit
+    rev: 4.5.0
+    hooks:
+      - id: gdformat
+        exclude: ^addons/
+      - id: gdlint
+        exclude: ^addons/
+
+  - repo: local
+    hooks:
+      - id: srp-size
+        name: srp-size (file/function line budgets)
+        entry: python dev_kit/ci/godot/scripts/check_size_budgets.py
+        language: system
+        pass_filenames: false
+        files: \.gd$
+
+      - id: naming-grep-discoverable
+        name: naming-grep-discoverable
+        entry: python dev_kit/ci/godot/scripts/check_naming.py
+        language: system
+        pass_filenames: false
+        files: \.gd$
+
+      - id: commit-message-conforms
+        name: commit-message-conforms (Conventional Commits)
+        entry: python dev_kit/ci/godot/scripts/check_commit_message.py
+        language: system
+        stages: [commit-msg]

@@ -1,0 +1,16 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Machine-local config (Godot binary path, etc.) - never tracked, see dev_kit/ci/godot/README.md
+/tools/local.env
+
+# GdUnit4 test reports
+/reports/
+
+# Python tooling
+__pycache__/
+*.pyc
+
+# Claude Code local (machine-specific) settings
+.claude/settings.local.json

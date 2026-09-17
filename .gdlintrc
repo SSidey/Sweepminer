@@ -1,0 +1,9 @@
+function-arguments-number: 6
+function-lines-count: [40, 40]
+max-file-lines: 300
+max-line-length: 100
+class-load-variable-name: '^_?[A-Z][A-Za-z0-9]*$'
+class-name: '^[A-Z][A-Za-z0-9]*$'
+function-name: '^_?[a-z][a-z0-9_]*$'
+constant-name: '^[A-Z][A-Z0-9_]*$'
+signal-name: '^[a-z][a-z0-9_]*$'
