@@ -3,7 +3,7 @@ spec_type: hybrid
 status: active
 ---
 
-# Sweepminer — Consolidated Design Spec v0.3
+11# Sweepminer — Consolidated Design Spec v0.3
 
 A tunneling roguelike-lite: descend through floors, excavate blind using adjacency clues, gather resources and minions, fortify what you've claimed, and resolve threats as tactical battles fought on the tile you dug into. Exploration is deliberate and turn-based; combat is tactical and mostly auto-resolving, with a hero as the one directly piloted piece. Pressure comes from a set of interlocking systems — nodes, disturbance, and a floor-awakening mechanic — that punish both rushing and lingering.
 
@@ -340,3 +340,61 @@ confirmed. `ocp-shotgun-surgery`, `isp-method-count`/`isp-stub-detection`, and
 `dip-direction` are manual-review rubric rows for now, stated plainly in
 `dev_kit/ci/godot/README.md` rather than covered by a placeholder script that always
 passes.
+
+### Decision 5 — Versioned release playtest artifacts, with a composite Release Readiness Score scoped to that purpose only
+
+**Rationale:** Per-PR mechanical tracking (`dev_kit/progress-log.md`) answers "did this
+change regress anything" and deliberately keeps its metrics unreduced to a single number,
+per `dev_kit/principles/progress-tracking.md` Gate 1's own stated position ("does not
+invent a synthetic composite score to paper over that gap"). Playtesting answers a
+different question — "is this version worth a human's time to play" — for which a single
+at-a-glance number alongside room for human judgement is more useful than a metrics table.
+This decision introduces that number for release entries specifically, without touching
+Gate 1's per-PR behaviour or contradicting its stated position there.
+
+**Versioning scheme:** Semantic version tags (`vMAJOR.MINOR.PATCH`), computed from
+Conventional Commits on every push to `main`
+(`dev_kit/ci/godot/scripts/determine_version_bump.py`):
+- Any commit with `!` after its type/scope, or a `BREAKING CHANGE:` footer, since the last
+  tag → bump. **Pre-1.0 exception:** while `MAJOR` is `0`, a breaking change bumps
+  `MINOR`, not `MAJOR` — this is semver's own "initial development" convention (anything
+  may change before a `1.0.0` stability commitment), stated here so it isn't a silent
+  surprise the first time it fires.
+- Else any `feat:` commit since the last tag → bump `MINOR`.
+- Else any `fix:` commit since the last tag → bump `PATCH`.
+- Else (only `chore`/`docs`/`refactor`/`test`/`perf` since the last tag) → no bump, no
+  release, no new playtest artifact. A tooling-only PR has nothing for a human to play.
+
+**Release Readiness Score (0–100):** `60 × automated_checks_ratio + 40 × test_pass_ratio`,
+computed by `dev_kit/ci/godot/scripts/release_score.py`:
+- `automated_checks_ratio` — the "Automated checks passing" fraction from that release's
+  `dev_kit/progress-log.md` row (e.g. `6/6` → `1.0`).
+- `test_pass_ratio` — passed/total from that CI run's GdUnit4 JUnit report. **If no tests
+  exist yet, this contributes `0`, not `N/A`** — a version with no tests is not "ready,"
+  and the score should say so rather than hide the gap by excluding the component.
+- Coverage is not in the formula: no confirmed GdUnit4 coverage CLI flag exists yet (see
+  `dev_kit/ci/godot/README.md`), and this score doesn't fake a number it can't measure.
+
+**Player-facing entry fields** (`PLAYTEST_LOG.md`, one entry per release, never filled in
+by the implementing agent — same conflict-of-interest reasoning as Gate 2 generally):
+Functional rating (1–5), Fun/engagement rating (1–5), a structured bug-entries table
+(severity, what happened, repro steps), and freeform session/completion notes.
+
+**Mechanism:** on a push to `main` that warrants a bump, CI tags the release, then opens a
+PR (never commits to `main` directly, same as every other change in this project) adding
+the `VERSION` bump and the new `PLAYTEST_LOG.md` entry, for the user to merge.
+
+**Alternatives:**
+
+| Option | Reason Rejected |
+|--------|-----------------|
+| One playtest entry per PR (the prior convention) | A tooling-only PR (most of Phase 0) has no gameplay to have an opinion about; entries should correspond to something actually playable |
+| Keep individual metrics only, no composite score, for releases too | Explicitly rejected by the user in favour of a single at-a-glance readiness number for this specific purpose |
+| Include coverage in the formula now | No confirmed CLI coverage flag exists yet; would require faking a number, which this project's tooling explicitly avoids elsewhere |
+| CI commits the version bump / log entry directly to `main` | Would violate this project's standing rule that nothing lands on `main` without a human-reviewed PR, even from automation |
+
+**Consequences:** `PLAYTEST_LOG.md` entries are now generated automatically per release,
+not manually per PR by whichever agent implemented it — `.claude/skills/run-phase/SKILL.md`
+no longer instructs appending a stub entry per phase. The very first tag this project cuts
+will be `v0.1.0` (from a `feat:`-containing merge) or `v0.0.1` (from a `fix:`-only merge),
+since no prior tag exists.

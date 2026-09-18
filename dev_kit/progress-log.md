@@ -15,3 +15,4 @@ root.
 | Date | Ref | Automated checks passing | Test count | Coverage | Lint warnings | Size violations | Naming violations | ISP violations | DIP violations | Helper violations | Gate 1 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-09-17 | phase-0-baseline (PR #1, PR #2) | 6/6 | 0 | manual (GdUnit4 editor inspector) | 0 | 0 | 0 | 0 | 0 | 0 | PASS |
+| 2026-09-18 | chore/release-versioning-and-playtest-artifacts | 6/6 | 0 | manual (GdUnit4 editor inspector) | 0 | 0 | 0 | 0 | 0 | 0 | PASS |
