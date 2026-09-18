@@ -92,26 +92,37 @@ skippable:
    `check_ocp_shotgun_surgery.py origin/main` (all under
    `dev_kit/ci/godot/scripts/`) — these also run in `pre-commit`/CI, but run them
    directly here to catch anything before pushing.
-3. Compare against the pre-phase baseline: rubric pass count, test count, coverage
-   (overall and changed-lines, ≥90% per `dev_kit/config/thresholds.yaml`), lint warning
-   count, size-budget violations. **Any regression blocks the phase from being done** —
-   loop back into step 2 rather than opening a PR with a known regression.
+3. Run `python dev_kit/ci/godot/scripts/report_progress.py "<branch-name>"` — this
+   computes the current metrics, diffs them against the previous row in
+   `dev_kit/progress-log.md`, and appends the new row itself. **A non-zero exit means a
+   regression was detected; the phase is not done until that's fixed** — loop back into
+   step 2 rather than opening a PR on a known regression. Coverage still isn't in this
+   script (see its docstring) — check it manually via the GdUnit4 editor inspector and
+   note the number when filling in the PR.
 4. Read each static check's heuristic-limit note in
    `dev_kit/ci/godot/README.md` ("Heuristic limits") before trusting a green run
    blindly — a pass means the specific heuristic found nothing, not that the underlying
    SOLID property is proven.
 5. Update `README.md`'s **Status** and **Roadmap** sections to reflect the phase's actual
    completion state — this is a standing part of finishing a phase, not optional polish.
+6. Append a stub entry to `PLAYTEST_LOG.md` for this PR (title, date, a blank
+   **Verdict**/**Play feel notes**) using its own template section — leave the content
+   blank for the user to fill in; do not write play-feel judgements yourself, same
+   conflict-of-interest reasoning as Gate 2 generally.
 
 ## 5. Open the PR — do not merge it
 
 Push the branch and open a PR with `gh pr create`, body from
 `dev_kit/templates/pr-description.md`: summary, link to the spec/plan, the rubric
-checklist from step 4, the before/after progress-log metrics table, and the Gate 2 human
-qualitative review section left **blank** for the user to fill in — that gate is
-explicitly not something the implementing agent fills in for itself
-(`progress-tracking.md`: "an agent judging whether its own change was an improvement has
-an obvious conflict of interest").
+checklist from step 4, and for the two Gate sections:
+- **Progress log entry** — link to the row `report_progress.py` just appended to
+  `dev_kit/progress-log.md` (quote it inline too, so the reviewer doesn't have to open
+  another file).
+- **Human qualitative review (Gate 2)** — link to the stub entry just added to
+  `PLAYTEST_LOG.md`, rather than filling Reviewer/Verdict/Notes inline. That gate is
+  explicitly not something the implementing agent fills in for itself
+  (`progress-tracking.md`: "an agent judging whether its own change was an improvement
+  has an obvious conflict of interest").
 
 Per this project's decision, **stop here.** Report the PR URL and a short summary of what
 landed; the user reviews and merges. Do not merge, even if CI is green.
