@@ -28,7 +28,7 @@ built" — this is that build.
 | `ocp-shotgun-surgery` | `scripts/check_ocp_shotgun_surgery.py` | CI only (needs a diff vs. the PR base ref — see below) |
 | `isp-method-count` / `isp-stub-detection` | `scripts/check_isp.py` | run via `pre-commit` and CI |
 | `dip-direction` | `scripts/check_dip_direction.py` | run via `pre-commit` and CI |
-| `progress-trend` | `scripts/run_tests.ps1` output diffed against the prior progress-log entry by hand | see `principles/progress-tracking.md` |
+| `progress-trend` | `scripts/report_progress.py` | appends + diffs a `progress-log.md` row automatically, see `principles/progress-tracking.md` |
 
 ## Heuristic limits (stated plainly, not hidden)
 
@@ -85,3 +85,21 @@ pwsh dev_kit/ci/godot/scripts/run_tests.ps1
 test+coverage run is deliberately excluded from pre-commit (too slow per-commit) and
 instead run on demand locally and authoritatively in CI — see
 `rubrics/run-baseline.rubrics.md`'s "Where this runs" section.
+
+## Release versioning and the playtest score
+
+Separate from the rubric checks above: `.github/workflows/release.yml` runs on every push
+to `main` and implements Decision 5 in `sweepminer-spec-v0.3.md` — semantic version tags
+computed from Conventional Commits, plus a composite Release Readiness Score for
+`PLAYTEST_LOG.md` entries (scoped to that purpose only; it does not change how
+`progress-trend`/Gate 1 reports per-PR metrics above).
+
+| Script | Purpose |
+|---|---|
+| `scripts/determine_version_bump.py` | Classifies commits since the last `vX.Y.Z` tag and decides the next version, or `none` |
+| `scripts/release_score.py` | Pure formula: `60 × automated_checks_ratio + 40 × test_pass_ratio` |
+| `scripts/generate_release_playtest_entry.py` | Appends the new versioned stub to `PLAYTEST_LOG.md` and bumps `VERSION` |
+
+The workflow tags the release directly (metadata, not tracked file content) but — like
+every other change in this project — opens a PR rather than committing the `VERSION`/
+`PLAYTEST_LOG.md` changes straight to `main`.

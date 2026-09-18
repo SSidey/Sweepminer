@@ -55,6 +55,15 @@ open the current scaffold:
 2. Clone this repo.
 3. Open `project.godot` in the Godot editor.
 
+## Releases & playtesting
+
+Every merge to `main` is checked for a version bump (semantic versioning from
+Conventional Commits — see Decision 5 in the spec). A `feat`/`fix`/breaking-change merge
+tags a release and opens a small follow-up PR adding a new entry to
+[`PLAYTEST_LOG.md`](PLAYTEST_LOG.md) with a mechanical Release Readiness Score and blank
+fields for you to fill in after playing. A `chore`-only merge (tooling, docs, CI) produces
+no release — there's nothing new to play. Current version: see [`VERSION`](VERSION).
+
 ## Development
 
 This project follows the AI-first / SOLID-mechanical dev kit in [`dev_kit/`](dev_kit/) —

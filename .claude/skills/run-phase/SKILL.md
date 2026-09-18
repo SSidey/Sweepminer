@@ -105,10 +105,14 @@ skippable:
    SOLID property is proven.
 5. Update `README.md`'s **Status** and **Roadmap** sections to reflect the phase's actual
    completion state — this is a standing part of finishing a phase, not optional polish.
-6. Append a stub entry to `PLAYTEST_LOG.md` for this PR (title, date, a blank
-   **Verdict**/**Play feel notes**) using its own template section — leave the content
-   blank for the user to fill in; do not write play-feel judgements yourself, same
-   conflict-of-interest reasoning as Gate 2 generally.
+
+**Do not touch `PLAYTEST_LOG.md` or `VERSION` yourself.** Per Decision 5 in
+`sweepminer-spec-v0.3.md`, those are generated automatically by
+`.github/workflows/release.yml` when a merge to `main` warrants a version bump (any
+`feat`/`fix`/breaking commit since the last tag) — it tags the release, computes the
+Release Readiness Score, and opens its own separate PR with the new `PLAYTEST_LOG.md`
+entry. A `chore`-only phase correctly produces no such PR, since there's nothing new to
+play.
 
 ## 5. Open the PR — do not merge it
 
@@ -118,11 +122,13 @@ checklist from step 4, and for the two Gate sections:
 - **Progress log entry** — link to the row `report_progress.py` just appended to
   `dev_kit/progress-log.md` (quote it inline too, so the reviewer doesn't have to open
   another file).
-- **Human qualitative review (Gate 2)** — link to the stub entry just added to
-  `PLAYTEST_LOG.md`, rather than filling Reviewer/Verdict/Notes inline. That gate is
-  explicitly not something the implementing agent fills in for itself
-  (`progress-tracking.md`: "an agent judging whether its own change was an improvement
-  has an obvious conflict of interest").
+- **Human qualitative review (Gate 2)** — if this phase's merge is expected to trigger a
+  release (a `feat`/`fix`/breaking commit), note that the separate auto-generated release
+  PR will carry the `PLAYTEST_LOG.md` entry for it; otherwise note there's nothing to
+  playtest. Never write play-feel judgements yourself either way — that's explicitly not
+  something the implementing agent fills in for itself (`progress-tracking.md`: "an agent
+  judging whether its own change was an improvement has an obvious conflict of
+  interest").
 
 Per this project's decision, **stop here.** Report the PR URL and a short summary of what
 landed; the user reviews and merges. Do not merge, even if CI is green.
